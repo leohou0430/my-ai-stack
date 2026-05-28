@@ -31,6 +31,7 @@
   - [周边工具链](#周边工具链)
     - [Skills Manager（技能管理）](#skills-manager技能管理)
     - [CC Switch（模型切换）](#cc-switch模型切换)
+    - [cc-connect（远程桥接）](#cc-connect远程桥接)
     - [其他周边工具](#其他周边工具)
 
 ---
@@ -164,9 +165,7 @@ graph TB
 | 快速原型 | Cursor + Claude | Agent 最强 |
 | 终端自动化 | Hermes Agent | 多平台网关 |
 
-
 ---
-
 
 # Vibe Coding 体验
 
@@ -224,7 +223,6 @@ Vibe Coding 的效果，80% 取决于你的 Prompt 质量：
 几个实际风险。技术债：你不理解代码就没法优化和重构，跑得快但债务在涨。安全漏洞：AI 会生成有 SQL 注入、XSS 问题的代码，它不替你把安全关。调试困难：出了 bug 你不懂逻辑，排查起来很痛苦。能力退化：长期依赖 AI，手写代码的感觉会变钝。
 
 ---
-
 
 # Hermes Agent 深度解析
 
@@ -366,7 +364,6 @@ graph TB
 
 ---
 
-
 ## 周边工具链
 
 Hermes Agent 不是一个人在战斗。它周围还有一圈工具，各自干各自的活，组合起来才是一套完整的 AI 工作流。
@@ -390,6 +387,7 @@ graph TB
         CCSwitch["CC Switch<br>模型/Provider 切换"]
         Profile["Profile<br>多配置隔离"]
         Auth["Credential Pool<br>密钥轮换"]
+        CCConn["cc-connect<br>远程桥接"]
     end
     subgraph Automation["🔄 自动化"]
         Cron["Cron<br>定时任务"]
@@ -410,6 +408,7 @@ graph TB
     style Coding fill:#238636,stroke:#7ee787,color:#fff
     style Skills fill:#9e6a03,stroke:#e3b341,color:#fff
     style Config fill:#8957e5,stroke:#bc8cff,color:#fff
+    style CCConn fill:#8957e5,stroke:#bc8cff,color:#fff
     style Automation fill:#da3633,stroke:#f85149,color:#fff
     style External fill:#21262d,stroke:#30363d,color:#fff
 ```
@@ -421,6 +420,10 @@ graph TB
 ### CC Switch（模型切换）
 
 支持 20 多个 Provider 切换，OpenRouter、Anthropic、OpenAI、DeepSeek、Google Gemini、xAI、小米 MiMo、月之暗面、阿里 DashScope 都在列。Credential Pool 可以配多个 API Key 自动轮换，单个 key 被限流了会自动切到下一个。
+
+### cc-connect（远程桥接）
+
+把本地 AI 编程 Agent 接入即时通讯平台的桥梁工具。支持 Claude Code、Cursor、Gemini CLI、Codex 等 7 款 Agent，可接入飞书、钉钉、Slack、Telegram、Discord、LINE、微信等主流 IM。核心场景：手机随时随地远程向工作机上的 Agent 下达指令，支持多 Agent 多平台组合。
 
 ### 其他周边工具
 

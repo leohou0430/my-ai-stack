@@ -1,6 +1,8 @@
 > 一个写了 13 年 Java 的后端架构师，聊聊我怎么用 AI 工具干活的。
 >
 > 每个工具我都真的用过，每个坑我都真的踩过。不是科普，是实战记录。
+> 
+> [![Powered by OrcaRouter](https://img.shields.io/badge/Powered_by-OrcaRouter-2563eb)](https://www.orcarouter.ai/ref/ref_825d8fa7b6be0d049af3)
 
 ---
 

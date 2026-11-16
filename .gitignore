@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 
 # VS Code local history
 .history/
+
+# WorkBuddy local memory (project notes, not for publishing)
+.workbuddy/

@@ -8,9 +8,10 @@
 
 - [我用 AI 做了什么](#我用-ai-做了什么)
 - [产品线与工程样本](#产品线与工程样本)
-  - [家伴：家庭多Agent协作平台](#家伴家庭多-agent-协作平台)
+  - [家伴助手（my-agent）：家庭多 Agent 协作平台](#家伴助手my-agent家庭多-agent-协作平台)
+  - [llmgw4j：Java 大模型 API 网关（已开源）](#llmgw4jjava-大模型-api-网关已开源)
   - [edu-all：教育微服务上的 AI 扩展床](#edu-all教育微服务上的-ai-扩展床)
-  - [family-menu-miniapp：工程规范样本（非 AI 产品）](#family-menu-miniapp工程规范样本非-ai-产品)
+  - [拾味食簿（family-menu-miniapp）：工程规范样本（非 AI 产品）](#拾味食簿family-menu-miniapp工程规范样本非-ai-产品)
   - [本仓库：工具链方法论沉淀](#本仓库工具链方法论沉淀)
 - [概览：AI IDE、Vibe Coding 与 Agent](#概览ai-idevibe-coding-与-agent)
   - [AI IDE：代码编辑器的第三次进化](#ai-ide代码编辑器的第三次进化)
@@ -54,14 +55,15 @@
 
 | 项目 | 可见性 | 技术 | 说明 |
 | ------ | ------ | ------ | ------ |
-| **my-agent** | 私有 · 暂未开源 | Java 25 · Spring Boot 4.1 · AgentScope 2.0.3 | 家庭多 Agent 平台：Planner + 8 SubAgent；双 RAG；Mem0 增强召回；REST / A2A / Agent Protocol / ACP-stdio（CLI） |
-| **edu-all** | 私有 · 未开源实验床 | Java 25 · Spring Boot 4.2-M1 · Spring Cloud 2025.1 | 在线教育微服务全栈；`edu-llm` 扩展挂 AgentScope 2.0.0 + MCP client/server |
-| **family-menu-miniapp** | 私有 · 暂未开源 | 微信云开发 · TDesign | 「她的菜单本」家庭点单；业务侧不做 LLM，用 AGENTS/CONTEXT/Issues 让 Agent 可维护 |
+| **my-agent / 家伴助手 Kinloop** | 私有 · 暂未开源 | Java 25 · Spring Boot 4.1.2 · agentscope-java 2.0.4 | 家庭多 Agent 平台：Planner + 7 SubAgent；Mem0 增强召回；REST / AG-UI / Agent Protocol / ACP-stdio（CLI） |
+| **llmgw4j** | **公开 · Apache-2.0** | Java 25 · Spring Boot 4.1.2 · GraalVM 25 | 大模型 API 网关：WebFlux / 虚拟线程双数据面 + 一套治理层；八协议字节透传；可复现对照压测 |
+| **edu-all** | 私有 · 未开源实验床 | Java 25 · Spring Boot 4.1.0-RC1 · Spring Cloud 2025.1.1 | 在线教育微服务全栈；`edu-llm` 扩展挂 AgentScope + MCP client/server |
+| **拾味食簿（family-menu-miniapp）** | 私有 · 暂未开源 | 微信云开发 · v2.7.1 | 家庭协作食簿；无交易语义的个人主体合规版；业务侧不做 LLM，用 AGENTS/CONTEXT/Issues 让 Agent 可维护 |
 | **热点内容生产** | 工作流 | Hermes Agent + Cron | 每日热点采集 → 提炼 → 去 AI 味 → 多平台分发 → Wiki / IM 归档 |
 | **个人知识库** | 本地 Wiki（不在本仓） | Hermes Agent + LLMWiki | 实体 / 概念 / 对比三类页面，wikilinks 交叉引用，热点自动沉淀 |
 | **macOS / 浏览器自动化** | 本地脚本 | Playwright · AppleScript · CLI | 搜索记录、Chrome 控制、备忘录 / 消息等本地自动化 |
 
-本仓库（[my-ai-stack](https://github.com/leohou0430/my-ai-stack)）本身是**公开的工具链与方法论笔记**，不聚合上述产品源码；产品仓各自独立演进。
+本仓库（[my-ai-stack](https://github.com/leohou0430/my-ai-stack)）本身是**公开的工具链与方法论笔记**，不聚合上述产品源码；产品仓各自独立演进。唯一公开源码的是 [llmgw4j](https://github.com/leohou0430/llmgw4j)。
 
 ---
 
@@ -69,60 +71,107 @@
 
 下面几条是我最近真正花时间打磨的产品或工程样本，也是「AI 辅助写代码」之外，更接近「用 AI 把架构约束落地」的部分。
 
-## 家伴：家庭多 Agent 协作平台
+## 家伴助手（my-agent）：家庭多 Agent 协作平台
 
-这是当前最接近「完整 Agent 产品」的项目。目标不是 Demo Chat，而是一个带家庭隔离、治理配额、多协议接入和可观测性的协作服务。架构图如下：
-![整体](my-agent-architecture-light.png)
+产品名现为 **家伴助手 Kinloop**（站点 kinloop.site），仓库与技术标识继续沿用 `my-agent`。这是当前最接近「完整 Agent 产品」的项目：不是 Demo Chat，而是带家庭隔离、治理配额、多协议接入和可观测性的协作服务。
 
 ```mermaid
 graph TB
-    Client["Web / CLI / Desktop / A2A"] --> Planner["Planner<br/>HarnessAgent 唯一入口"]
-    Planner --> SA["8 个编程式 SubAgent"]
-    SA --> Cap["订单 · 销售 · 工单 · 数据分析<br/>RAG · 摘要 · 媒体 · Usage"]
+    Client["Web / CLI / Desktop"] --> Planner["Planner<br/>HarnessAgent 唯一入口"]
+    Planner --> SA["7 个编程式 SubAgent"]
+    SA --> Cap["订单 · 销售 · 工单 · 数据分析<br/>RAG · 摘要 · 媒体"]
     Planner --> Mem["会话状态 + Mem0 增强召回<br/>家庭 / 个人双路，个人优先"]
-    Cap --> Rag["双 RAG：Qdrant 主副本<br/>MCP 知识副本同版本双写"]
+    Cap --> Rag["知识：Qdrant Cloud 主副本<br/>ragent MCP 读取回退"]
     style Planner fill:#1f6feb,stroke:#58a6ff,color:#fff
     style SA fill:#238636,stroke:#7ee787,color:#fff
     style Mem fill:#9e6a03,stroke:#e3b341,color:#fff
     style Rag fill:#8957e5,stroke:#bc8cff,color:#fff
 ```
 
+> 早期全景图 `my-agent-architecture-light.png` 仍留在本仓，但图中还画着 **A2A / Nacos / Usage SubAgent / 8 个 SubAgent**，均已从产品移除，请以本章文字与上图为准。
+
 **可公开复述的架构摘要：**
 
-- 栈：Java 25、Spring Boot 4.1、agentscope-java 2.0.3；Maven 多模块 reactor + 独立 npm 客户端（core / cli / web / desktop）
-- 拓扑：Planner 经 SubagentsMiddleware 调度 8 个 SubAgent；对外只暴露 Planner
-- 协议：REST chat/stream、A2A Agent Card、Agent Protocol（durable `/tasks`）、CLI ACP-stdio
-- 知识：主检索走 AgentScope SimpleKnowledge + Qdrant；回退 MCP 知识副本；写入经工作流保证同版本同步
+- 栈：Java 25、Spring Boot 4.1.2、agentscope-java 2.0.4；Maven 多模块 reactor + 独立 npm 客户端（core / cli / web / desktop）
+- 拓扑：Planner 经 `SubagentsMiddleware` 调度 **7 个**编程式 SubAgent（order / sales / support / data-analyst / RAG / summarizer / media；Usage 已退役）；对外只暴露 Planner
+- 协议：REST chat、AG-UI 标准 SSE（`/agui/run`）、Agent Protocol（durable `/tasks`）、CLI ACP-stdio；**A2A 与 Nacos 已从产品移除**。ACP 仅由 CLI stdio 提供，无 ACP REST
+- 知识：主检索 AgentScope SimpleKnowledge + Qdrant Cloud；ragent MCP 作第二副本与读取回退
 - 记忆：Mem0 Cloud v3 做非权威增强召回；普通对话只自动沉淀个人范围，家庭共享必须用户明确要求
-- 家庭域：任务草稿、日历、财务、育儿媒体、购物与家庭记忆等；敏感写路径可走外部裁决
-- 身份与治理：JWT `sub` 派生个人主体 + 必填家庭成员校验；分钟限流 / 并发隔离 / 日配额（含模型 token 预算）
-- 客户端：Vue 3 + Vite Web；Desktop 基于 Tauri 2
+- 家庭域：任务草拟→确认→接受→完成、日历（PostgreSQL outbox + Restate 分发）、财务（整数最小货币单位）、育儿媒体（仅监护人）、购物记录、家庭记忆与个人可见范围导出；另含「学校通知整理」（文字 + 最多 4 张截图 → 日程/待办/清单，需配置视觉模型）
+- 身份与治理：Authing JWT + 必填 `householdId` 成员校验（请求体 `userId` 不参与隔离）；分钟限流 / 并发隔离 / 日配额与模型 token 日预算在多实例间共享；FREE / FAMILY 两档套餐
+- 数据面：云 Postgres、Qdrant Cloud、Mem0 Cloud，根 `compose.yaml` 默认不起本地数据库
+- 部署：腾讯云轻量服务器（OpenCloudOS 9、2C2G），JAR 手动发布为主
+- 客户端：Vue 3 + shadcn-vue/Tailwind Web；Desktop 基于 Tauri 2
 
-对我来说，这个项目验证的不是「Agent 能不能聊天」，而是：**多协议、多租户家庭边界、双副本检索、增强记忆和治理能不能同时站住。**
+对我来说，这个项目验证的不是「Agent 能不能聊天」，而是：**多协议、多租户家庭边界、增强记忆、家庭业务状态机和治理配额能不能同时站住。**
+
+## llmgw4j：Java 大模型 API 网关（已开源）
+
+[llmgw4j](https://github.com/leohou0430/llmgw4j) 是这批项目里**唯一公开源码**的一个（Apache-2.0，当前 v0.3.1）。一句话：**给 Java 团队看的模型网关**——不引入 Python/Go 组件，不改现有微服务治理习惯。
+
+它是**可复现的参考实现与测量台**，不是 Kong / Higress / Envoy 的即插即用替代品。核心特色是「**一套治理层 + 两套可切换数据面 + 八协议字节透传 + 可复现对照压测**」：
+
+```mermaid
+graph TB
+    Req["POST /v1/chat / responses / messages<br/>images / videos / embeddings / rerank / audio"] --> App["llmgw-app<br/>组合根"]
+    App --> E1["WebFlux 数据面<br/>Netty · sendAsync"]
+    App --> E2["虚拟线程数据面<br/>Tomcat 11 · 阻塞读"]
+    E1 --> Gov["llmgw-governance<br/>鉴权 · 配额 · token 限流 · 缓存 · 账单 · 审计"]
+    E2 --> Gov
+    Gov --> Up["JdkHttpUpstream<br/>两引擎共用同一客户端"]
+    style App fill:#1f6feb,stroke:#58a6ff,color:#fff
+    style Gov fill:#8957e5,stroke:#bc8cff,color:#fff
+    style Up fill:#238636,stroke:#7ee787,color:#fff
+```
+
+- **协议面**：chat / responses / messages / images / videos / embeddings / rerank / audio-speech 八协议字节透传；协议是**路由维度而非转换维度**，网关按协议只解析少量字段（model / stream / prompt 类文本）用于路由与计量，原始 chunk 与响应体原样透传
+- **双数据面**：WebFlux（Netty，反应式）与虚拟线程（Tomcat 11）共用同一治理层和上游客户端，唯一变量是并发模型——本质是**单变量对照实验**，不是功能叠加
+- **治理层**：API key 运行时管理（SHA-256 哈希存储 + 轮换）、HS256 JWT 入口认证、token 配额（在途预留 + 结算）、按模型限流、语义缓存（进程内余弦相似度）、Guardrail SPI、重试退避 / 三段超时 / 加权 LB + 熔断
+- **扩展机制**：项目内原生 `@ExtensionPoint` / `META-INF/llmgw/extensions` / `Extensions`（参考 Dubbo 命名与惰性机制，但不依赖 Dubbo）；各能力域统一「聚合 parent + 一个 api + 每实现一个 child」，Maven Enforcer 强制单向无环
+- **多副本**：`-Predis` 用 Lua 脚本保证限流/配额/熔断/key 表/缓存的跨副本原子性；默认全内存零外部依赖，native 编译最干净
+- **Native**：GraalVM 25，两个引擎按 profile 各编一个二进制；官方 SDK 兼容、DeepSeek 真实调用、Linux amd64 双引擎 native 均有独立验收报告
+
+**有意不做**（交给前置代理或上层平台）：WebSocket/gRPC 入口、HTTP/2 上游、Prompt 模板管理、SSE 流内容改写、MCP/A2A Agent 协议、内置 PII 改写、DB-first 持久化。
+
+在这之前我推荐的多模型网关是 OrcaRouter（见文末），llmgw4j 是**从"用网关"到"自己写网关"**的一步：把「字节保真透传」和「LLM 语义治理」这两件事在 Java 里做到可测、可对照。生产边界与已知差距（金额硬预算尚无持久共享账本、OIDC/RBAC、分布式控制面）都写在其 README 风险清单里，不藏着。
 
 ## edu-all：教育微服务上的 AI 扩展床
 
-edu-all 是一套完整的在线教育 Spring Cloud 微服务（网关、认证授权、用户、课程、订单、支付、评论、消息、前后端 BFF 等），长期用来跟前沿 Java / Cloud 栈。源码目前**未开源**。
+edu-all 是一套完整的在线教育 Spring Cloud 微服务（网关、认证授权、用户、课程、订单、支付、评论、消息、前后端 BFF 等），长期用来跟前沿 Java / Cloud 栈。源码在 Gitee，**未开源**。
 
-近期和 AI 相关的进展集中在扩展模块 `edu-llm`（尚未成为核心交易主路径）：
+按当前 `README_CN.md` / `pom.xml` 实测的底座版本：
 
-- `edu-ai-boot`：AgentScope harness 接入（钉在 **2.0.0**）
+| 层 | 版本 |
+| --- | --- |
+| JDK / Spring / Spring Boot | 25 / 7.0.7 / **4.1.0-RC1** |
+| Spring Cloud / Alibaba | 2025.1.1 / 2025.1.0.0 |
+| Spring AI / Spring AI Alibaba | 2.0.0-M5 / 1.1.2.2 |
+| MCP SDK BOM | 0.17.0 |
+| 基础设施 | MySQL 9.7 · Redis 8.4 · MongoDB 8.2.3 · Nacos 3.2.1 · RocketMQ 5.3.4 · Seata 2.6 · OTel 0.144 · Prometheus 3.9 · OpenSearch 3.4 |
+
+近期和 AI 相关的进展集中在 `edu-extensions/edu-llm`（尚未成为核心交易主路径）：
+
+- `edu-ai-boot`：AgentScope harness 接入
 - `edu-mcp-client` / `edu-mcp-server`：把 MCP 当作服务间工具边界来试
 - 依赖面同时覆盖 Spring AI、LangChain4j 等，方便横向对比，而不是押单一框架
-- 宿主平台本身：Java 25、Spring Boot 4.2-M1、Spring Cloud 2025.1、Nacos / Apollo / RocketMQ / 虚拟线程 / OTel；课程服务还做过 GraalVM Native Image
+- 扩展层还有 `edu-agents` / `edu-djl-boot` / `edu-flow-boot` 等实验模块；课程服务做过 GraalVM Native Image
 
 策略很明确：**先把微服务底座顶到较新的版本，再在扩展层挂 Agent / MCP，避免把实验能力焊死进核心交易路径。**
 
-## family-menu-miniapp：工程规范样本（非 AI 产品）
+> 注：`README_CN.md` 里含有本地开发用的中间件账号密码示例，那类配置属于本地实验环境，与本文无关，也请勿照抄到任何公开环境。
 
-「她的菜单本」是微信云开发家庭协作点单小程序：厨房菜单本、本地草稿单、云端订单状态机、邀请码建家、订阅消息通知。源码目前**暂未开源**。
+## 拾味食簿（family-menu-miniapp）：工程规范样本（非 AI 产品）
+
+现名 **拾味食簿**（仓库标识仍是 `family-menu-miniapp`，当前 v2.7.1），是微信云开发家庭协作食簿小程序：厨房菜单本、想吃清单、家庭食簿、膳食日历、冰箱库存、买菜清单、可解释决策器、家庭动态、下厨统计、数据导出、内置菜谱发现。源码目前**暂未开源**。
+
+v2.5.1 起转为**个人主体合规版**——刻意去掉价格 / 金额 / 订单等交易语义；v2.7 的亮点是决策器给出推荐理由、家庭动态横幅、「这个家一起做了 N 顿饭」和数据一键导出。
 
 业务本身几乎不用 LLM。它出现在这份笔记里，是因为我把它当成「**非 AI 产品，如何用 Agent 友好工程规范维护**」的样本：
 
-- 根目录 `CONTEXT.md` 管领域术语，`AGENTS.md` 管实现事实
+- 根目录 `CONTEXT.md` 管领域术语，`AGENTS.md` 管实现事实；另有 `CLOUD_SETUP.md` / `DEPLOY.md` / `docs/release/upload-checklist.md`
 - ADR + GitHub Issues 驱动需求；标签区分 `needs-triage` / `ready-for-agent` / `ready-for-human` 等角色
-- 云函数契约统一 `{ action, data }`；封面 / 头像用组件级降级，而不是堆默认图
-- 自动化测试覆盖云函数纯逻辑与自定义组件
+- 云函数契约统一 `{ action, data }`（`manageFamily` / `manageMenu` / `sendNotify`）；封面 / 头像用组件级降级，而不是堆默认图
+- 自动化测试覆盖云函数纯逻辑与自定义组件；`docs/prd/` 沉淀产品路线图与 PRD
 
 结论：Agent 编码协作的上限，往往不取决于模型，而取决于**领域边界和文档是否写清楚**。
 
@@ -306,6 +355,7 @@ graph TB
 | 终端自动化 / 内容生产 | Hermes Agent | 多平台网关 + Skills + Cron |
 | 手机远程指挥本机 Agent | cc-connect | 把本地编码 Agent 接到 IM |
 | 多模型路由 | OrcaRouter | 网关层选模；**勿与 Orca ADE 混淆** |
+| 自研模型网关 / 双引擎对照 | llmgw4j | 自己写的 Java 网关，测字节透传与治理开销；已开源 |
 
 ---
 

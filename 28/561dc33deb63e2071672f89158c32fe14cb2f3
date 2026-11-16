@@ -1,0 +1,19 @@
+.gitignore
+  s_ab7928797d4d52::t_968b2998756a4d 147-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "28561dc33deb63e2071672f89158c32fe14cb2f3",
+  "prompts": {},
+  "sessions": {
+    "s_ab7928797d4d52": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a19866-baee-7770-8858-025229bb9f61",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "houbaosheng <houbaosheng@inke.cn>"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+README.md
+  h_1c4b92584cf711 58-59,61,91,95-96,98-100,103-105,111,113,120,123-124,127,131,133-136,139,141,170,172
+kinloop-architecture-light.html
+  h_1c4b92584cf711 1-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f3944e09ff7fda5b317e5617bebacf93d8ff99b3",
+  "prompts": {},
+  "humans": {
+    "h_1c4b92584cf711": {
+      "author": "houbaosheng <houbaosheng@inke.cn>"
+    }
+  }
+}
